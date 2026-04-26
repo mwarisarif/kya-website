@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KYA — Know Your Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0A0B0F;
+  --ink2:#13141A;
+  --ink3:#1C1E27;
+  --steel:#2A2D3A;
+  --mist:#8B8FA8;
+  --ghost:#C4C7D6;
+  --white:#F0F1F6;
+  --acid:#00FF85;
+  --acid2:#00D4FF;
+  --warn:#FF6B35;
+  --purple:#A78BFA;
+  --line:rgba(255,255,255,0.07);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  color:var(--white);
+  font-family:'IBM Plex Sans',sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+}
+.grid-bg{
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:64px;
+  background:rgba(10,11,15,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--line);
+}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--acid)}
+.nav-logo span{color:var(--white);opacity:0.5;font-size:14px;font-family:'IBM Plex Mono',monospace;letter-spacing:2px;margin-left:10px;vertical-align:middle}
+.nav-links{display:flex;gap:32px}
+.nav-links a{color:var(--mist);text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;transition:color 0.2s;font-family:'IBM Plex Mono',monospace}
+.nav-links a:hover{color:var(--acid)}
+.nav-cta{background:var(--acid);color:var(--ink);border:none;padding:8px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.nav-cta:hover{background:var(--acid2)}
+
+/* HERO */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:120px 48px 80px;overflow:hidden;z-index:1;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);
+  padding:6px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:2px;color:var(--acid);text-transform:uppercase;margin-bottom:32px;width:fit-content;
+}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--acid);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,12vw,140px);line-height:0.9;letter-spacing:2px;margin-bottom:8px}
+.hero h1 .accent{-webkit-text-stroke:2px var(--acid);color:transparent}
+.hero-sub{font-size:clamp(18px,3vw,26px);color:var(--mist);font-weight:300;max-width:600px;margin-bottom:48px;line-height:1.4;font-family:'IBM Plex Mono',monospace}
+.hero-sub strong{color:var(--white)}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.btn-primary{background:var(--acid);color:var(--ink);border:none;padding:14px 32px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.btn-primary:hover{background:var(--acid2);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.2);padding:14px 32px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.btn-outline:hover{border-color:var(--acid);color:var(--acid)}
+.hero-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:24px}
+.hero-stat .num{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;color:var(--acid)}
+.hero-stat .label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mist);text-transform:uppercase}
+.hero-scroll{position:absolute;bottom:40px;left:48px;display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--mist);text-transform:uppercase}
+.scroll-line{width:40px;height:1px;background:var(--mist)}
+.orb{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb-1{width:600px;height:600px;background:rgba(0,255,133,0.04);top:-200px;left:-200px}
+.orb-2{width:400px;height:400px;background:rgba(0,212,255,0.05);top:30%;right:-100px}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:100px 48px}
+.section-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--acid);text-transform:uppercase;margin-bottom:16px}
+.section-tag::before{content:'// '}
+h2.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,72px);line-height:1;letter-spacing:2px;margin-bottom:48px;color:var(--white)}
+h2.section-title span{color:var(--acid)}
+
+/* MARQUEE */
+.marquee-wrap{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;background:var(--ink2)}
+.marquee-track{display:flex;gap:0;animation:scroll 20s linear infinite;white-space:nowrap}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marquee-item{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--mist);text-transform:uppercase;padding:0 32px}
+.marquee-item span{color:var(--acid);margin-right:32px}
+
+/* PROBLEM */
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:64px}
+.problem-cell{background:var(--ink2);padding:40px 32px;transition:background 0.3s}
+.problem-cell:hover{background:var(--ink3)}
+.problem-num{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;color:var(--warn);margin-bottom:8px}
+.problem-label{font-size:13px;color:var(--ghost);line-height:1.5}
+
+/* ARCHITECTURE */
+.arch-layers{display:flex;flex-direction:column;gap:2px}
+.arch-layer{display:grid;grid-template-columns:200px 1fr auto;align-items:center;gap:32px;padding:24px 32px;background:var(--ink2);border:1px solid var(--line);cursor:pointer;transition:all 0.25s;border-left:3px solid transparent}
+.arch-layer:hover,.arch-layer.active{background:var(--ink3)}
+.layer-num{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:2px;color:var(--mist)}
+.layer-name{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--white)}
+.layer-desc{font-size:12px;color:var(--mist);max-width:500px;display:none;grid-column:2;margin-top:8px;line-height:1.7}
+.arch-layer.active .layer-desc{display:block}
+.layer-tags{display:flex;gap:6px;flex-wrap:wrap;grid-column:2;margin-top:10px;display:none}
+.arch-layer.active .layer-tags{display:flex}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;padding:3px 10px;border:1px solid rgba(0,255,133,0.2);color:var(--acid);background:rgba(0,255,133,0.05)}
+.layer-toggle{font-size:20px;color:var(--mist);font-family:'IBM Plex Mono',monospace;min-width:24px;text-align:center}
+
+/* TECH STACK */
+.tech-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.tech-col{background:var(--ink2);padding:28px 24px}
+.tech-col-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.tech-item{font-size:12px;color:var(--ghost);padding:8px 0;border-bottom:1px solid var(--line);line-height:1.4}
+.tech-item:last-child{border-bottom:none}
+.tech-item strong{display:block;color:var(--white);font-weight:500;font-size:12px;margin-bottom:2px}
+
+/* ROADMAP */
+.roadmap-track{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.phase-card{background:var(--ink2);padding:32px 24px;transition:background 0.2s;position:relative;overflow:hidden}
+.phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.phase-card:nth-child(1)::before{background:var(--acid)}
+.phase-card:nth-child(2)::before{background:var(--acid2)}
+.phase-card:nth-child(3)::before{background:var(--purple)}
+.phase-card:nth-child(4)::before{background:var(--warn)}
+.phase-card:hover{background:var(--ink3)}
+.phase-num{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:1;opacity:0.05;position:absolute;bottom:16px;right:16px;letter-spacing:-4px}
+.phase-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mist);text-transform:uppercase;margin-bottom:6px}
+.phase-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:6px}
+.phase-duration{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 10px;border:1px solid var(--line);color:var(--mist);display:inline-block;margin-bottom:20px}
+.phase-tasks{list-style:none;font-size:12px;color:var(--ghost);margin-bottom:16px}
+.phase-tasks li{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:flex-start}
+.phase-tasks li::before{content:'›';color:var(--acid);flex-shrink:0}
+.milestone{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acid);padding:8px 12px;background:rgba(0,255,133,0.05);border:1px solid rgba(0,255,133,0.15);line-height:1.5}
+
+/* REVENUE */
+.revenue-list{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:48px}
+.revenue-row{display:grid;grid-template-columns:48px 1fr 140px 180px;align-items:center;gap:24px;padding:20px 28px;background:var(--ink2);transition:background 0.2s}
+.revenue-row:hover{background:var(--ink3)}
+.rev-icon{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--acid);opacity:0.7}
+.rev-name{font-size:14px;font-weight:500}
+.rev-model{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--acid2);background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.15);padding:4px 10px;text-align:center}
+.rev-amount{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--acid);text-align:right}
+
+/* DEMO SECTION */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.demo-box{background:var(--ink2);border:1px solid var(--line);padding:28px}
+.demo-box h3{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--acid);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.demo-field{margin-bottom:16px}
+.demo-field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mist);text-transform:uppercase;margin-bottom:6px}
+.demo-field input,.demo-field select{width:100%;background:var(--ink3);border:1px solid var(--steel);color:var(--white);padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s}
+.demo-field input:focus,.demo-field select:focus{border-color:var(--acid)}
+.demo-field select option{background:var(--ink3)}
+.demo-btn{width:100%;background:var(--acid);color:var(--ink);border:none;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:8px}
+.demo-btn:hover{background:var(--acid2)}
+.demo-output{background:var(--ink);border:1px solid var(--line);padding:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.8;min-height:200px;max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+.demo-output .ok{color:var(--acid)}
+.demo-output .warn{color:var(--warn)}
+.demo-output .err{color:#FF4444}
+.demo-output .info{color:var(--acid2)}
+.demo-output .dim{color:var(--mist)}
+
+/* FOOTER */
+footer{position:relative;z-index:1;border-top:1px solid var(--line);padding:48px;display:flex;align-items:center;justify-content:space-between;background:var(--ink2)}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:var(--acid)}
+.footer-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mist);text-transform:uppercase}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 24px}
+  .nav-links{display:none}
+  .hero{padding:100px 24px 60px}
+  .hero-stats{display:none}
+  section{padding:60px 24px}
+  .problem-grid{grid-template-columns:1fr}
+  .tech-grid{grid-template-columns:1fr 1fr}
+  .roadmap-track{grid-template-columns:1fr 1fr}
+  .revenue-row{grid-template-columns:1fr auto}
+  .demo-grid{grid-template-columns:1fr}
+  footer{padding:32px 24px;flex-direction:column;gap:16px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">KYA <span>v1.0</span></div>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#stack">Stack</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#revenue">Revenue</a>
+    <a href="#demo">Live Demo</a>
+  </div>
+  <button class="nav-cta">Get Early Access</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-badge"><div class="badge-dot"></div>ERC-8004 · W3C DID · Live on Testnet</div>
+  <h1>KNOW<br>YOUR<br><span class="accent">AGENT</span></h1>
+  <p class="hero-sub"><strong>Decentralized identity</strong> for the machine economy.<br>Every AI agent. Verified. Credentialed. Audited.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try Live Demo</button>
+    <button class="btn-outline" onclick="document.getElementById('architecture').scrollIntoView({behavior:'smooth'})">View Architecture</button>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">45B+</div><div class="label">Agents by 2026</div></div>
+    <div class="hero-stat"><div class="num">$60B</div><div class="label">Token Economy</div></div>
+    <div class="hero-stat"><div class="num">10K+</div><div class="label">Testnet Registrations</div></div>
+  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div>Scroll to explore</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee"></div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-tag">The Problem</div>
+  <h2 class="section-title">Agents have<br><span>no identity</span></h2>
+  <div class="problem-grid">
+    <div class="problem-cell"><div class="problem-num">45B+</div><div class="problem-label">Non-human identities entering the workforce by 2026 — none verifiable</div></div>
+    <div class="problem-cell"><div class="problem-num">$14B</div><div class="problem-label">Global non-compliance costs for financial firms in 2023 alone</div></div>
+    <div class="problem-cell"><div class="problem-num">50%</div><div class="problem-label">Of internet traffic is already bots — bad bots account for nearly a third</div></div>
+    <div class="problem-cell"><div class="problem-num">59%</div><div class="problem-label">Of companies experienced deepfake-driven attacks in 2025</div></div>
+    <div class="problem-cell"><div class="problem-num">29min</div><div class="problem-label">Average AI agent breakout time in 2025 — fastest observed: 27 seconds</div></div>
+    <div class="problem-cell"><div class="problem-num">0</div><div class="problem-label">Existing platforms providing cryptographic identity for AI agents at scale</div></div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture" style="background:var(--ink2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="section-tag">System Architecture</div>
+  <h2 class="section-title">5-Layer<br><span>Trust Stack</span></h2>
+  <div class="arch-layers" id="archLayers"></div>
+</section>
+
+<!-- TECH STACK -->
+<section id="stack">
+  <div class="section-tag">Technology</div>
+  <h2 class="section-title">Full<br><span>Tech Stack</span></h2>
+  <div class="tech-grid" id="techGrid"></div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap" style="background:var(--ink2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="section-tag">Timeline</div>
+  <h2 class="section-title">12-Month<br><span>Roadmap</span></h2>
+  <div class="roadmap-track" id="roadmapTrack"></div>
+</section>
+
+<!-- REVENUE -->
+<section id="revenue">
+  <div class="section-tag">Business Model</div>
+  <h2 class="section-title">Revenue<br><span>Streams</span></h2>
+  <div class="revenue-list" id="revenueList"></div>
+</section>
+
+<!-- LIVE DEMO -->
+<section id="demo" style="background:var(--ink2);border-top:1px solid var(--line)">
+  <div class="section-tag">Interactive Demo</div>
+  <h2 class="section-title">Register an<br><span>Agent Live</span></h2>
+  <div class="demo-grid">
+    <!-- INPUT PANEL -->
+    <div class="demo-box">
+      <h3>Agent Registration</h3>
+      <div class="demo-field">
+        <label>Agent Name</label>
+        <input type="text" id="agentName" value="TradeAgent_01" placeholder="e.g. TradeAgent_01"/>
+      </div>
+      <div class="demo-field">
+        <label>Owner Wallet</label>
+        <input type="text" id="agentOwner" value="0xOwnerWalletAddress" placeholder="0x..."/>
+      </div>
+      <div class="demo-field">
+        <label>Spend Limit ($)</label>
+        <input type="number" id="spendLimit" value="500" min="1"/>
+      </div>
+      <div class="demo-field">
+        <label>Capabilities</label>
+        <select id="capabilities" multiple style="height:90px">
+          <option value="trade" selected>trade</option>
+          <option value="read_market" selected>read_market</option>
+          <option value="execute_order" selected>execute_order</option>
+          <option value="transfer_funds">transfer_funds</option>
+          <option value="read_data">read_data</option>
+        </select>
+      </div>
+      <button class="demo-btn" onclick="registerAgent()">Register Agent</button>
+
+      <h3 style="margin-top:24px">Run Actions</h3>
+      <div class="demo-field">
+        <label>Action Type</label>
+        <select id="actionType">
+          <option value="read_market">read_market</option>
+          <option value="execute_order">execute_order</option>
+          <option value="trade">trade</option>
+          <option value="transfer_funds">transfer_funds</option>
+        </select>
+      </div>
+      <div class="demo-field">
+        <label>Amount ($)</label>
+        <input type="number" id="actionAmount" value="100" min="0"/>
+      </div>
+      <button class="demo-btn" onclick="runAction()" style="background:var(--ink3);color:var(--acid);border:1px solid var(--acid)">Execute Action</button>
+      <button class="demo-btn" onclick="runStressTest()" style="background:var(--ink3);color:var(--warn);border:1px solid var(--warn);margin-top:8px">Run Stress Test (trigger anomaly)</button>
+      <button class="demo-btn" onclick="clearAll()" style="background:transparent;color:var(--mist);border:1px solid var(--steel);margin-top:8px">Clear & Reset</button>
+    </div>
+
+    <!-- OUTPUT PANEL -->
+    <div class="demo-box">
+      <h3>System Output</h3>
+      <div class="demo-output" id="demoOutput"><span class="dim">// Waiting for agent registration...
+// Fill in the form and click Register Agent</span></div>
+
+      <h3 style="margin-top:20px">Trust Score</h3>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:8px">
+        <div style="flex:1;background:var(--ink3);border:1px solid var(--line);height:8px;border-radius:0;overflow:hidden">
+          <div id="trustBar" style="height:100%;background:var(--acid);width:0%;transition:width 0.5s"></div>
+        </div>
+        <div id="trustPct" style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--acid);min-width:48px;text-align:right">0%</div>
+        <div id="trustGrade" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mist)">—</div>
+      </div>
+
+      <h3 style="margin-top:20px">Audit Trail</h3>
+      <div id="auditTable" style="font-family:'IBM Plex Mono',monospace;font-size:11px;min-height:80px">
+        <span style="color:var(--mist)">// No actions yet</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo">KYA</div>
+    <div class="footer-meta" style="margin-top:6px">Know Your Agent · Identity for the Machine Economy</div>
+  </div>
+  <div class="footer-meta">
+    Built on ERC-8004 · W3C DID · ERC-4337 · ERC-7007<br style="line-height:2">
+    © 2026 KYA Protocol. All rights reserved.
+  </div>
+</footer>
+
+<script>
+// ── MARQUEE ──
+const items=['ERC-8004','W3C DID','Zero-Knowledge Proofs','Verifiable Credentials','Agent Identity','ERC-4337','Trust Score','Audit Trail','Blockchain Verified','ERC-7007','Decentralized Identity','AI Compliance'];
+const track=document.getElementById('marquee');
+const full=[...items,...items,...items,...items];
+track.innerHTML=full.map(i=>`<span class="marquee-item"><span>◈</span>${i}</span>`).join('');
+
+// ── ARCHITECTURE ──
+const layers=[
+  {num:'01',name:'Agent Identity Registry',color:'#00FF85',desc:'On-chain DID (Decentralized Identifier) for every AI agent. Uses ERC-8004 NFT standard. Stores agent owner, model hash, version, capabilities, and jurisdiction.',tags:['DID Document','ERC-8004 NFT Mint','Owner Binding','Capability Manifest']},
+  {num:'02',name:'Credential & Permission Engine',color:'#00D4FF',desc:'Verifiable Credentials (VCs) issued to agents. Defines what the agent can and cannot do — spend limits, allowed contracts, data access scope.',tags:['VC Issuance','Session Keys','Spend Caps','Role-based ACL']},
+  {num:'03',name:'Runtime Behavior Monitor',color:'#A78BFA',desc:'AI-powered anomaly detection layer. Monitors agent transactions in real-time, flags deviations from declared behavior, triggers circuit breakers.',tags:['Anomaly Detection ML','Circuit Breaker','Behavior Fingerprint','Alert Engine']},
+  {num:'04',name:'Tamper-Evident Audit Log',color:'#FF6B35',desc:'Every agent action is cryptographically hashed and stored on-chain. Regulators, owners, and counterparties can audit the full decision trail.',tags:['Action Hashing','IPFS Storage','On-chain Anchoring','Compliance Export']},
+  {num:'05',name:'Trust Score & Reputation',color:'#FBBF24',desc:'ERC-7007 based on-chain reputation. Every successful/failed interaction updates the agent trust score — a credit system for AI agents.',tags:['ERC-7007 Token','Score Calculation','Cross-chain Portability','Reputation History']},
+];
+const archEl=document.getElementById('archLayers');
+layers.forEach((l,i)=>{
+  const d=document.createElement('div');
+  d.className='arch-layer'+(i===0?' active':'');
+  d.style.borderLeftColor=i===0?l.color:'transparent';
+  d.innerHTML=`
+    <div><div class="layer-num">LAYER ${l.num}</div><div class="layer-name">${l.name}</div></div>
+    <div style="display:flex;flex-direction:column">
+      <div class="layer-desc">${l.desc}</div>
+      <div class="layer-tags">${l.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    </div>
+    <div class="layer-toggle">${i===0?'−':'+'}</div>
+  `;
+  d.addEventListener('click',()=>{
+    archEl.querySelectorAll('.arch-layer').forEach((el,j)=>{
+      const active=el===d;
+      el.classList.toggle('active',active);
+      el.querySelector('.layer-toggle').textContent=active?'−':'+';
+      el.style.borderLeftColor=active?layers[j].color:'transparent';
+    });
+  });
+  archEl.appendChild(d);
+});
+
+// ── TECH STACK ──
+const techData=[
+  {title:'Blockchain',color:'#00FF85',items:[{n:'Ethereum/Polygon',r:'Smart contracts, ERC-8004 NFTs'},{n:'Solana',r:'High-speed agent logging'},{n:'IPFS/Filecoin',r:'Decentralized audit storage'},{n:'Chainlink',r:'Off-chain data verification'}]},
+  {title:'Identity & Auth',color:'#00D4FF',items:[{n:'W3C DID Spec',r:'Decentralized identifier standard'},{n:'Veramo Framework',r:'VC issuance & management'},{n:'ERC-4337',r:'Account abstraction wallets'},{n:'ZKSync / zkProofs',r:'Privacy-preserving identity'}]},
+  {title:'AI / ML',color:'#A78BFA',items:[{n:'Python + PyTorch',r:'Anomaly detection training'},{n:'LangChain',r:'Agent behavior orchestration'},{n:'Claude / OpenAI API',r:'Agent reasoning layer'},{n:'Pinecone (Vector DB)',r:'Behavior embeddings'}]},
+  {title:'Backend',color:'#FF6B35',items:[{n:'Node.js + TypeScript',r:'API gateway & credential engine'},{n:'GraphQL',r:'Flexible agent registry query'},{n:'Redis',r:'Session & rate limiting'},{n:'PostgreSQL',r:'Off-chain metadata & analytics'}]},
+  {title:'Frontend / SDK',color:'#FBBF24',items:[{n:'React + Next.js',r:'Developer dashboard'},{n:'Wagmi + viem',r:'Wallet & blockchain integration'},{n:'npm SDK',r:'One-line agent registration'},{n:'REST + WebSocket',r:'Real-time agent monitoring'}]},
+];
+const tg=document.getElementById('techGrid');
+techData.forEach(cat=>{
+  const col=document.createElement('div');
+  col.className='tech-col';
+  col.innerHTML=`<div class="tech-col-title" style="color:${cat.color}">${cat.title}</div>`+
+    cat.items.map(i=>`<div class="tech-item"><strong>${i.n}</strong>${i.r}</div>`).join('');
+  tg.appendChild(col);
+});
+
+// ── ROADMAP ──
+const phases=[
+  {label:'Phase 1',title:'Foundation',duration:'Months 1–3',tasks:['Define DID schema for AI agents','Deploy ERC-8004 on testnet','Build agent registration API','Developer dashboard v1','Closed beta: 10 agents'],milestone:'First 100 agents on testnet'},
+  {label:'Phase 2',title:'Credentials',duration:'Months 4–6',tasks:['VC issuance & revocation system','Session key & spend cap logic','ERC-4337 account abstraction','Anomaly detection ML (v1)','Deploy on Polygon mainnet'],milestone:'First verified agent payment'},
+  {label:'Phase 3',title:'Reputation',duration:'Months 7–9',tasks:['ERC-7007 trust score contract','Tamper-evident audit pipeline','IPFS long-term log storage','EU AI Act compliance module','Open public beta'],milestone:'10,000 verified agent DIDs'},
+  {label:'Phase 4',title:'Scale',duration:'Months 10–12',tasks:['npm SDK for fast onboarding','Enterprise API with SLA','Cross-chain portability (Solana)','DeFi & e-commerce integrations','Series A fundraising'],milestone:'100K agents · First enterprise deal'},
+];
+const rt=document.getElementById('roadmapTrack');
+phases.forEach((p,i)=>{
+  const card=document.createElement('div');
+  card.className='phase-card';
+  card.innerHTML=`<div class="phase-label">${p.label}</div><div class="phase-title">${p.title}</div><div class="phase-duration">${p.duration}</div><ul class="phase-tasks">${p.tasks.map(t=>`<li>${t}</li>`).join('')}</ul><div class="milestone">🎯 ${p.milestone}</div><div class="phase-num">${String(i+1).padStart(2,'0')}</div>`;
+  rt.appendChild(card);
+});
+
+// ── REVENUE ──
+const revenues=[
+  {icon:'◈',name:'Agent Registration Fee',model:'One-time',amount:'$10–50 / agent NFT'},
+  {icon:'◎',name:'Credential API',model:'Monthly SaaS',amount:'$99–999 / org / mo'},
+  {icon:'▣',name:'Audit Log Storage',model:'Usage-based',amount:'$0.001 / log entry'},
+  {icon:'◆',name:'Enterprise KYA Suite',model:'Annual contract',amount:'$50K–500K / yr'},
+  {icon:'⬡',name:'Trust Score Oracle',model:'Per-query',amount:'$0.01 / verification'},
+];
+const rl=document.getElementById('revenueList');
+revenues.forEach(r=>{
+  const row=document.createElement('div');
+  row.className='revenue-row';
+  row.innerHTML=`<div class="rev-icon">${r.icon}</div><div class="rev-name">${r.name}</div><div class="rev-model">${r.model}</div><div class="rev-amount">${r.amount}</div>`;
+  rl.appendChild(row);
+});
+
+// ── LIVE DEMO ENGINE ──
+let state={
+  agent:null,
+  credential:null,
+  totalSpent:0,
+  successes:0,
+  failures:0,
+  auditEntries:[],
+  actionCounts:{},
+};
+
+function sha256sim(str){
+  let hash=0;
+  for(let i=0;i<str.length;i++){hash=((hash<<5)-hash)+str.charCodeAt(i);hash|=0}
+  return Math.abs(hash).toString(16).padStart(8,'0').repeat(4);
+}
+
+function genDID(){return'did:kya:'+Math.random().toString(16).slice(2,18)}
+function genVC(){return'vc:'+Math.random().toString(16).slice(2,14)}
+function now(){return new Date().toISOString()}
+
+function log(msg,type='dim'){
+  const out=document.getElementById('demoOutput');
+  const span=document.createElement('span');
+  span.className=type;
+  span.textContent=msg+'\n';
+  out.appendChild(span);
+  out.scrollTop=out.scrollHeight;
+}
+
+function updateTrust(){
+  const total=state.successes+state.failures;
+  const pct=total===0?0:Math.round((state.successes/total)*100);
+  document.getElementById('trustBar').style.width=pct+'%';
+  document.getElementById('trustPct').textContent=pct+'%';
+  let grade='F — Untrusted';
+  let col='#FF4444';
+  if(pct>=90){grade='A — Highly Trusted';col='#00FF85';}
+  else if(pct>=75){grade='B — Trusted';col='#00FF85';}
+  else if(pct>=50){grade='C — Moderate Risk';col='#FBBF24';}
+  else if(pct>=25){grade='D — High Risk';col='#FF6B35';}
+  document.getElementById('trustGrade').textContent=grade;
+  document.getElementById('trustGrade').style.color=col;
+  document.getElementById('trustBar').style.background=col;
+  document.getElementById('trustPct').style.color=col;
+}
+
+function updateAudit(){
+  const el=document.getElementById('auditTable');
+  if(state.auditEntries.length===0){el.innerHTML='<span style="color:var(--mist)">// No actions yet</span>';return;}
+  el.innerHTML=state.auditEntries.slice(-6).map(e=>{
+    const col=e.status==='executed'?'var(--acid)':'var(--warn)';
+    return`<div style="display:flex;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)">
+      <span style="color:${col};min-width:64px">[${e.status.toUpperCase()}]</span>
+      <span style="color:var(--ghost);flex:1">${e.type} $${e.amount}</span>
+      <span style="color:var(--mist);font-size:10px">${e.hash.slice(0,12)}...</span>
+    </div>`;
+  }).join('');
+}
+
+function registerAgent(){
+  const name=document.getElementById('agentName').value.trim();
+  const owner=document.getElementById('agentOwner').value.trim();
+  const limit=parseFloat(document.getElementById('spendLimit').value);
+  const caps=Array.from(document.getElementById('capabilities').selectedOptions).map(o=>o.value);
+
+  if(!name||!owner||isNaN(limit)||limit<=0||caps.length===0){
+    log('ERROR — Please fill all fields correctly.','err');
+    return;
+  }
+
+  state={agent:null,credential:null,totalSpent:0,successes:0,failures:0,auditEntries:[],actionCounts:{}};
+  document.getElementById('demoOutput').innerHTML='';
+
+  const did=genDID();
+  const vcId=genVC();
+  const modelHash=sha256sim(name);
+  const expiry=new Date(Date.now()+30*24*60*60*1000).toISOString();
+
+  state.agent={did,name,owner,capabilities:caps,spend_limit:limit,model_hash:modelHash,status:'active'};
+  state.credential={credential_id:vcId,permissions:caps,expires_at:expiry,status:'valid'};
+
+  log('============================================================','dim');
+  log('  AGENT REGISTERED SUCCESSFULLY','ok');
+  log('============================================================','dim');
+  log(`  DID         : ${did}`,'info');
+  log(`  Name        : ${name}`,'ok');
+  log(`  Owner       : ${owner}`,'ok');
+  log(`  Spend Limit : $${limit}`,'ok');
+  log(`  Model Hash  : ${modelHash}...`,'ok');
+  log(`  Status      : active`,'ok');
+  log('','dim');
+  log('  CREDENTIAL ISSUED','ok');
+  log(`  VC ID       : ${vcId}`,'info');
+  log(`  Permissions : ${caps.join(', ')}`,'ok');
+  log(`  Expires     : ${expiry.split('T')[0]}`,'ok');
+  log(`  Verified    : VALID ✓`,'ok');
+  log('============================================================','dim');
+
+  updateTrust();
+  updateAudit();
+}
+
+function runAction(){
+  if(!state.agent){log('ERROR — Register an agent first.','err');return;}
+
+  const type=document.getElementById('actionType').value;
+  const amount=parseFloat(document.getElementById('actionAmount').value)||0;
+
+  if(amount<0){
+    log(`[BLOCKED] ANOMALY — Negative amount detected: $${amount}`,'warn');
+    state.failures++;
+    state.auditEntries.push({type,amount,status:'blocked',hash:sha256sim(type+amount+now())});
+    updateTrust();updateAudit();return;
+  }
+
+  state.totalSpent+=amount;
+  state.actionCounts[type]=(state.actionCounts[type]||0)+1;
+
+  let status='executed';
+  let msg=`ALLOWED — '${type}' | $${amount} | total: $${state.totalSpent}`;
+
+  if(state.totalSpent>state.agent.spend_limit){
+    status='blocked';
+    msg=`ANOMALY — Spend limit exceeded. Total: $${state.totalSpent} / Limit: $${state.agent.spend_limit}`;
+  } else if(state.actionCounts[type]>10){
+    status='blocked';
+    msg=`ANOMALY — Action spam: '${type}' called ${state.actionCounts[type]} times`;
+  }
+
+  const entry={type,amount,status,hash:sha256sim(type+amount+now())};
+  state.auditEntries.push(entry);
+
+  if(status==='executed'){
+    state.successes++;
+    log(`  [EXECUTED] ${msg}`,'ok');
+  } else {
+    state.failures++;
+    log(`  [BLOCKED]  ${msg}`,'warn');
+  }
+
+  updateTrust();
+  updateAudit();
+}
+
+function runStressTest(){
+  if(!state.agent){log('ERROR — Register an agent first.','err');return;}
+  log('','dim');
+  log('  STRESS TEST — Running 6 actions...','info');
+  const actions=[
+    {type:'read_market',amount:0},
+    {type:'execute_order',amount:150},
+    {type:'execute_order',amount:200},
+    {type:'execute_order',amount:250},
+    {type:'read_market',amount:0},
+    {type:'execute_order',amount:-50},
+  ];
+  actions.forEach((a,i)=>{
+    setTimeout(()=>{
+      document.getElementById('actionType').value=a.type;
+      document.getElementById('actionAmount').value=a.amount;
+      runAction();
+    },i*400);
+  });
+}
+
+function clearAll(){
+  state={agent:null,credential:null,totalSpent:0,successes:0,failures:0,auditEntries:[],actionCounts:{}};
+  document.getElementById('demoOutput').innerHTML='<span class="dim">// Waiting for agent registration...\n// Fill in the form and click Register Agent</span>';
+  document.getElementById('trustBar').style.width='0%';
+  document.getElementById('trustPct').textContent='0%';
+  document.getElementById('trustGrade').textContent='—';
+  document.getElementById('auditTable').innerHTML='<span style="color:var(--mist)">// No actions yet</span>';
+}
+</script>
+</body>
+</html>
